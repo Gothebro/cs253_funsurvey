@@ -60,7 +60,7 @@ def render_count(col_label, horizontal=False):
     value_counts_html = value_counts_df.to_html()
 
     # Generate the histogram
-    # plt.figure(figsize=(8, 4))  # Optional, adjust size as needed
+    plt.figure(figsize=(12, 50))  # Optional, adjust size as needed
     if horizontal:
         barchart = sns.countplot(y=series)
     else:
