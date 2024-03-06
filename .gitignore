@@ -162,3 +162,4 @@ cython_debug/
 .idea/misc.xml
 .idea/runConfigurations/Flask.xml
 static/images/city_plot.png
+/static/images
