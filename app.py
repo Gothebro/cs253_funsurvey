@@ -43,26 +43,34 @@ def inject_vars():
     return {'label_dict': label_dict}
 
 
-def render_count(col_label, horizontal=False):
+def render_count(col_label, horizontal):
     question = col_label
     qtext = label_dict[question]
     series = df[question]
 
-    # Generate descriptive statistics HTML
-    descrip_stats = series.describe()
+    # Select the top 10 most frequent values
+    top_10_values = series.value_counts().nlargest(10).index
+    filtered_series = series[series.isin(top_10_values)]
+
+    # Generate descriptive statistics HTML for filtered data
+    descrip_stats = filtered_series.describe()
     descrip_df = pd.DataFrame(descrip_stats).transpose()
     descrip_html = descrip_df.to_html()
 
-    value_counts = series.value_counts(ascending=False)
-    value_counts_df = pd.DataFrame(value_counts).head(10)
+    value_counts = filtered_series.value_counts(ascending=False)
+    value_counts_df = pd.DataFrame(value_counts)
     value_counts_html = value_counts_df.to_html()
 
-    # Generate the histogram
-    plt.figure(figsize=(12, 50))  # Optional, adjust size as needed
+    # Adjust figure size dynamically or set a larger size
+    plt.figure(figsize=(10, 6))  # Adjust as needed
+
     if horizontal:
-        barchart = sns.countplot(y=series)
+        barchart = sns.countplot(y=filtered_series, order=filtered_series.value_counts().index)
     else:
-        barchart = sns.countplot(x=series)
+        barchart = sns.countplot(x=filtered_series, order=filtered_series.value_counts().index)
+
+    plt.tight_layout()  # Adjust layout to fit
+
     image_path = f'static/images/{question}_plot.png'
     plt.savefig(image_path)
     plt.close()
@@ -71,7 +79,6 @@ def render_count(col_label, horizontal=False):
     return render_template('numeric.html', title=question, qtext=qtext, descrip=descrip_html,
                            value_counts=value_counts_html,
                            chart_url=url_for('static', filename=f'images/{question}_plot.png'))
-
 
 @app.route('/')
 def home():
